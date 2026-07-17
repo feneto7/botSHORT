@@ -7,6 +7,7 @@ Este projeto é uma aplicação web feita em Python (Flask) que gera vídeos cur
 Certifique-se de ter instalado em sua máquina:
 - [Python 3.8+](https://www.python.org/downloads/)
 - Uma chave de API válida do [Google Gemini (Google AI Studio)](https://aistudio.google.com/)
+- [FFmpeg](https://ffmpeg.org/download.html) (Necessário para a biblioteca MoviePy processar os vídeos. Se usar Windows, lembre-se de adicionar o FFmpeg nas variáveis de ambiente `PATH`).
 
 ## Como configurar e rodar o projeto
 
