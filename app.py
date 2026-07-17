@@ -24,6 +24,8 @@ os.makedirs(TEMP_DIR, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # Gemini – usado apenas para GERAR O ROTEIRO (texto), não para imagens
+from dotenv import load_dotenv
+load_dotenv()
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'API TOKEN AQUI')
 client = genai.Client(api_key=GEMINI_API_KEY)
 
