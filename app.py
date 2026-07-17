@@ -60,8 +60,8 @@ def generate_image(prompt: str, output_path: str) -> bool:
     Gera imagem estilo bonecos palitos usando Pollinations.ai (GRATUITO, sem API key).
     """
     full_prompt = (
-        f"simple stick figure drawing, black lines on white background, "
-        f"minimalist cartoon doodle style, hand-drawn, no text, no words, no letters, "
+        f"high quality digital art, vibrant colors, beautifully detailed illustration, "
+        f"colorful cartoon or comic style, well drawn, masterpiece, no text, no words, no letters, "
         f"vertical portrait composition, scene: {prompt}"
     )
     try:
