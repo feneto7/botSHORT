@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎬 Bot de Vídeos Curtos – YouTube Shorts</title>
+  <style>
+    :root {
+      --bg:        #0f0f14;
+      --surface:   #1a1a24;
+      --surface2:  #24243a;
+      --accent:    #7c5cff;
+      --accent2:   #ff5c8a;
+      --text:      #e8e8f0;
+      --muted:     #8888a0;
+      --border:    #2e2e44;
+      --ok:        #4caf88;
+      --err:       #ff5c5c;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    header h1 {
+      font-size: 2rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    header p { color: var(--muted); margin-top: 6px; font-size: .95rem; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .card h2 {
+      font-size: 1.15rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    label { display:block; font-size: .85rem; color: var(--muted); margin-bottom: 6px; }
+
+    textarea, input[type="text"], select {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      padding: 12px 14px;
+      font-size: .95rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .2s;
+    }
+    textarea { min-height: 120px; resize: vertical; }
+    textarea:focus, input:focus, select:focus { border-color: var(--accent); }
+
+    .row { display: flex; gap: 12px; margin-bottom: 16px; }
+    .row > div { flex: 1; }
+
+    .topic-row { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 16px; }
+    .topic-row input { flex: 1; }
+
+    button {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 28px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+    }
+    button:hover { opacity: .9; }
+    button:active { transform: scale(.98); }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 10px 20px;
+      font-size: .9rem;
+    }
+
+    .status {
+      display: none;
+      text-align: center;
+      padding: 40px;
+    }
+    .status.active { display: block; }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 4px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .status-text { color: var(--muted); font-size: .9rem; }
+
+    .result { display: none; }
+    .result.active { display: block; }
+    .result video {
+      width: 100%;
+      max-width: 360px;
+      border-radius: 16px;
+      display: block;
+      margin: 0 auto 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.4);
+    }
+    .result-actions { text-align: center; }
+
+    .error-msg {
+      display: none;
+      background: rgba(255,92,92,.1);
+      border: 1px solid var(--err);
+      color: var(--err);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 16px;
+      font-size: .9rem;
+    }
+    .error-msg.active { display: block; }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 16px 0;
+      color: var(--muted);
+      font-size: .8rem;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: .8rem;
+      margin-top: 24px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <header>
+      <h1>🎬 Bot de Vídeos Curtos</h1>
+      <p>Gere vídeos no estilo bonecos palitos com voz e legendas para YouTube Shorts</p>
+    </header>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <!-- Card 1: Entrada -->
+    <div class="card">
+      <h2>📝 Roteiro</h2>
+
+      <div class="topic-row">
+        <div>
+          <label>Ou gere um roteiro a partir de um tópico (opcional)</label>
+          <input type="text" id="topicInput" placeholder="Ex: A importância de beber água">
+        </div>
+        <button class="btn-secondary" id="btnGenScript" onclick="generateScript()">
+          ✨ Gerar Roteiro
+        </button>
+      </div>
+
+      <div class="divider">OU ESCREVA / COLE ABAIXO</div>
+
+      <label>Escreva o roteiro (cada frase = uma cena)</label>
+      <textarea id="scriptInput" placeholder="Ex: Um boneco palito acorda de manhã e olha o celular. Ele vê que está atrasado e corre para o trabalho. No caminho ele tropeça e derruba o café..."></textarea>
+
+      <div class="row" style="margin-top:16px;">
+        <div>
+          <label>Voz (TTS)</label>
+          <select id="voiceSelect">
+            {% for code, name in voices.items() %}
+            <option value="{{ code }}">{{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top:20px; text-align:center;">
+        <button id="btnGenerate" onclick="generateVideo()">
+          🎥 Gerar Vídeo
+        </button>
+      </div>
+    </div>
+
+    <!-- Card 2: Status -->
+    <div class="card">
+      <div class="status" id="statusArea">
+        <div class="spinner"></div>
+        <div class="status-text" id="statusText">Processando... Isso pode levar alguns minutos.</div>
+      </div>
+
+      <div class="result" id="resultArea">
+        <h2 style="text-align:center; margin-bottom:16px;">✅ Vídeo Pronto!</h2>
+        <video id="videoPlayer" controls playsinline></video>
+        <div class="result-actions">
+          <a id="downloadLink" download>
+            <button class="btn-secondary">⬇️ Baixar Vídeo</button>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      Usa <strong>Gemini nano banana</strong> para imagens • <strong>edge-tts</strong> para voz • <strong>moviepy</strong> para vídeo<br>
+      Formato: 720×1280 (9:16) – ideal para YouTube Shorts
+    </footer>
+
+  </div>
+
+<script>
+  function showError(msg) {
+    const el = document.getElementById('errorMsg');
+    el.textContent = '❌ ' + msg;
+    el.classList.add('active');
+    setTimeout(() => el.classList.remove('active'), 8000);
+  }
+
+  async function generateScript() {
+    const topic = document.getElementById('topicInput').value.trim();
+    if (!topic) { showError('Digite um tópico primeiro.'); return; }
+
+    const btn = document.getElementById('btnGenScript');
+    btn.disabled = true;
+    btn.textContent = '⏳ Gerando...';
+
+    try {
+      const resp = await fetch('/generate_script', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ topic })
+      });
+      const data = await resp.json();
+      if (data.error) { showError(data.error); return; }
+      document.getElementById('scriptInput').value = data.script;
+    } catch (e) {
+      showError('Erro ao gerar roteiro: ' + e.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '✨ Gerar Roteiro';
+    }
+  }
+
+  async function generateVideo() {
+    const script  = document.getElementById('scriptInput').value.trim();
+    const voice   = document.getElementById('voiceSelect').value;
+
+    if (!script) { showError('Escreva um roteiro primeiro.'); return; }
+
+    const btn = document.getElementById('btnGenerate');
+    const status = document.getElementById('statusArea');
+    const result = document.getElementById('resultArea');
+
+    btn.disabled = true;
+    status.classList.add('active');
+    result.classList.remove('active');
+    document.getElementById('statusText').textContent =
+      'Gerando imagens, áudio e montando vídeo... Isso pode levar alguns minutos.';
+
+    try {
+      const resp = await fetch('/generate', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ script, voice })
+      });
+      const data = await resp.json();
+
+      if (data.error) {
+        showError(data.error);
+        return;
+      }
+
+      const video = document.getElementById('videoPlayer');
+      const dl    = document.getElementById('downloadLink');
+      video.src = data.video_url + '?t=' + Date.now();
+      dl.href   = data.video_url;
+      result.classList.add('active');
+    } catch (e) {
+      showError('Erro: ' + e.message);
+    } finally {
+      btn.disabled = false;
+      status.classList.remove('active');
+    }
+  }
+</script>
+</body>
+</html>
